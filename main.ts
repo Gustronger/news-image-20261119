@@ -18,6 +18,8 @@ if (!existsSync(outputDir)) {
 const destination = join(outputDir, "entry.png");
 copyFileSync(source, destination);
 
+const sourceSize = statSync(source).size;
+
 const bytes = readFileSync(destination);
 const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 if (!bytes.subarray(0, 8).equals(pngMagic)) {
@@ -25,8 +27,10 @@ if (!bytes.subarray(0, 8).equals(pngMagic)) {
 }
 
 const size = statSync(destination).size;
-if (size !== bytes.length) {
-  throw new Error(`entry.png size mismatch: stat ${size} vs read ${bytes.length}`);
+if (size !== bytes.length || size !== sourceSize) {
+  throw new Error(
+    `entry.png size mismatch: source ${sourceSize}, stat ${size}, read ${bytes.length}`,
+  );
 }
 
 console.log(`wrote ${destination} (${size} bytes)`);
